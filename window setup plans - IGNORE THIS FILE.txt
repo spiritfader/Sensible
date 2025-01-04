@@ -1,0 +1,9 @@
+figure out expected window dimensions for each item to sense (main problem is width - need to know how wide we can go based on terminal size)
+set up box window for each sensor category, divide window into two columns: name and value for each sensor
+set up window below with commands, await user input between refreshes
+arrow keys scroll through sensor columns
+
+d /sys/class/hwmon/hwmon4/name
+l /sys/class/hwmon/hwmon4/temp1_value
+v /sys/class/hwmon/hwmon4/temp1_input
+
