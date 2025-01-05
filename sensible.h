@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ncurses.h>
+#include <sensors/sensors.h>
 //#include <linux/hwmon.h>
 //#include <linux/hwmon-sysfs.h>
 
@@ -12,5 +13,5 @@ typedef struct {
     int value;
 } sensor;
 
-void refresh_sensor_window(WINDOW *win, FILE *sensor);
+void refresh_sensor_window(WINDOW *win, int offset);
 #endif
