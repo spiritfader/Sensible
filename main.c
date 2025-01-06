@@ -2,6 +2,11 @@
 Sensible: A TUI hardware monitoring program using ncurses.
 Authors: @Spiritfader, @NerdyKyogre
 */
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <ncurses.h>
+#include <sensors/sensors.h>
 #include "sensible.h"
 #define SENSOR_WIDTH 1 //placeholder value for now
 
@@ -19,11 +24,11 @@ int main(int argc, char **argv) {
     //initialize sensor windows
     WINDOW *sensors[numSensors];
     for (int i = 0; i < numSensors; i++) {
-        sensors[i] = newWin((scrHeight - 3), (scrWidth / numSensors), (i * (scrWidth / numSensors)), 0);
+        sensors[i] = newwin((scrHeight - 3), (scrWidth / numSensors), (i * (scrWidth / numSensors)), 0);
     }
     //set up commands - this window is static
-    WINDOW *commands = newWin(3, scrWidth, 0, (scrHeight - 3));
-    mvprintw(commands, 0, 1, "Use the left and right arrow keys to view more sensors, or press Q to quit Sensible.");
+    WINDOW *commands = newwin(3, scrWidth, 0, (scrHeight - 3));
+    mvwprintw(commands, 0, 1, "Use the left and right arrow keys to view more sensors, or press Q to quit Sensible.");
     wrefresh(commands);
 
     //get list of sensors to check
@@ -64,7 +69,8 @@ int main(int argc, char **argv) {
         //refresh all windows
         for (int i = 0; i < numSensors; i++) {
             refresh_sensor_window(sensors[i], (i + offset));
-        }  
+        }
+        sleep(1);  
     }
 }
 
@@ -80,9 +86,9 @@ void refresh_sensor_window(WINDOW *win, int offset) { //TODO - create API to sca
         return;
     }
 
-    mvprintw(win, 0, 1, chip.prefix); //TODO: get chip label from api
-    mvprintw(win, 1, 1, "SENSOR");
-    mvprintw(win, 1, 16, "VALUE"); //placeholder width
+    mvwprintw(win, 0, 1, (*chip).prefix); //TODO: get chip label from api
+    mvwprintw(win, 1, 1, "SENSOR");
+    mvwprintw(win, 1, 16, "VALUE"); //placeholder width
 
     int line = 3;
 
@@ -91,17 +97,17 @@ void refresh_sensor_window(WINDOW *win, int offset) { //TODO - create API to sca
     int f = 0;
     while ((feat = sensors_get_features(chip, &f)) != 0) {
         char *label = sensors_get_label(chip, feat); //according to libsensors documentation this dynamically allocates a string, which we can free as soon as it's in the buffer
-        mvprintw(win, line++, 1, label);
+        mvwprintw(win, line++, 1, label);
         free(label);
 
         sensors_subfeature const *subf;
         int s = 0;
         while ((subf = sensors_get_all_subfeatures(chip, feat, &s)) != 0) {
             double val;
-            int rc = sensors_get_value(chip, subf.number, &val);
+            int rc = sensors_get_value(chip, (*subf).number, &val);
             if (rc > 0) {
-                mvprintw(win, line, 1, subf.name);
-                mvprintw(win, line++, 16, "%d", val);
+                mvwprintw(win, line, 1, (*subf).name);
+                mvwprintw(win, line++, 16, "%f", val);
             }
         }
         line++;
@@ -118,5 +124,5 @@ const sensors_chip_name *get_chip_name(int num) {
     inputs: int num, position in list of sensors
     */
     sensors_init(NULL);
-    return = sensors_get_detected_chips(0, &num);
+    return sensors_get_detected_chips(0, &num);
 }
