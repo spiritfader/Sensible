@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
     //standard ncurses setup
     //initialize screen, get windows in place
     initscr();
+    timeout(50);
 
     //get screen dimensions
     int scrHeight, scrWidth;
@@ -30,6 +31,7 @@ int main(int argc, char **argv) {
     WINDOW *commands = newwin(3, scrWidth, (scrHeight - 3), 0);
     mvwprintw(commands, 0, 1, "Use the left and right arrow keys to view more sensors, or press Q to quit Sensible.");
     wrefresh(commands);
+    
     //get list of sensors to check
     //use parallel list: pressing arrow keys changes the offset
 
@@ -72,6 +74,7 @@ int main(int argc, char **argv) {
 }
 
 void refresh_sensor_window(WINDOW *win, int offset) { 
+    wclear(win);
     //create two columns - name and value
     box(win, 0, 0);
 
