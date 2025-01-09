@@ -8,7 +8,7 @@ Authors: @Spiritfader, @NerdyKyogre
 #include <ncurses.h>
 #include <sensors/sensors.h>
 #include "sensible.h"
-#define SENSOR_WIDTH 1 //placeholder value for now
+#define SENSOR_WIDTH 32
 
 int main(int argc, char **argv) {
     //standard ncurses setup
@@ -19,27 +19,22 @@ int main(int argc, char **argv) {
     int scrHeight, scrWidth;
     getmaxyx(stdscr, scrHeight, scrWidth);
 
-    int numSensors = scrWidth % SENSOR_WIDTH;
+    int numSensors = scrWidth / SENSOR_WIDTH;
 
     //initialize sensor windows
     WINDOW *sensors[numSensors];
     for (int i = 0; i < numSensors; i++) {
-        sensors[i] = newwin((scrHeight - 3), (scrWidth / numSensors), (i * (scrWidth / numSensors)), 0);
+        sensors[i] = newwin((scrHeight - 3), (scrWidth / numSensors), 0, (i * (scrWidth / numSensors)));
     }
     //set up commands - this window is static
-    WINDOW *commands = newwin(3, scrWidth, 0, (scrHeight - 3));
+    WINDOW *commands = newwin(3, scrWidth, (scrHeight - 3), 0);
     mvwprintw(commands, 0, 1, "Use the left and right arrow keys to view more sensors, or press Q to quit Sensible.");
     wrefresh(commands);
 
     //get list of sensors to check
-    //TODO: implement interface to scan /sys/class/hwmon for this information
-    //Should return list of file pointers which we can pass to refresh and scan
     //use parallel list: pressing arrow keys changes the offset
 
-
     int offset = 0; //start at top of list
-    //int numChips; //assign a value to this based on size of /sys/class/hwmon
-    //FILE *data[numChips]; //will get this as a pointer from scanner script - dynamically allocate?
 
     //refresh each window
     //need keypad mode to use arrows
@@ -74,8 +69,7 @@ int main(int argc, char **argv) {
     }
 }
 
-void refresh_sensor_window(WINDOW *win, int offset) { //TODO - create API to scan files for info given a file pointer 
-    //TODO - implement this function to add sensor data
+void refresh_sensor_window(WINDOW *win, int offset) { 
     //create two columns - name and value
     box(win, 0, 0);
 
@@ -86,13 +80,12 @@ void refresh_sensor_window(WINDOW *win, int offset) { //TODO - create API to sca
         return;
     }
 
-    mvwprintw(win, 0, 1, (*chip).prefix); //TODO: get chip label from api
+    mvwprintw(win, 0, 1, (*chip).prefix);
     mvwprintw(win, 1, 1, "SENSOR");
-    mvwprintw(win, 1, 16, "VALUE"); //placeholder width
+    mvwprintw(win, 1, 16, "           VALUE");
 
     int line = 3;
 
-    //copied from libsensors stackoverflow post
     sensors_feature const *feat;
     int f = 0;
     while ((feat = sensors_get_features(chip, &f)) != 0) {
@@ -105,9 +98,10 @@ void refresh_sensor_window(WINDOW *win, int offset) { //TODO - create API to sca
         while ((subf = sensors_get_all_subfeatures(chip, feat, &s)) != 0) {
             double val;
             int rc = sensors_get_value(chip, (*subf).number, &val);
-            if (rc > 0) {
+            //sensors_get_value(chip, (*subf).number, &val);
+            if (rc < 0) {
                 mvwprintw(win, line, 1, (*subf).name);
-                mvwprintw(win, line++, 16, "%f", val);
+                mvwprintw(win, line++, 16, "%16.2lf", val);
             }
         }
         line++;
