@@ -43,8 +43,19 @@ int main(int argc, char **argv) {
     cbreak();
     keypad(stdscr, TRUE);
 
+    int loop = 0, input; //we use loop to poll faster than the refresh interval
+
     while (1) {
-        int input = getch();
+        input = getch();
+        
+        //only refresh on keypress or every 20th 50ms loop (1 second)
+        if ((loop <= 20) && (input == ERR)) {
+            loop++;
+            continue
+        }
+
+        //if we want to fully refresh, we do the rest of the loop
+        loop = 0;
         //this equals ERR on no input
         switch (input) {
             case KEY_LEFT:
@@ -69,7 +80,6 @@ int main(int argc, char **argv) {
             wrefresh(commands);
 
         }
-        sleep(1);  
     }
 }
 
