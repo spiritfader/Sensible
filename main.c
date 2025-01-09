@@ -32,9 +32,6 @@ int main(int argc, char **argv) {
     mvwprintw(commands, 0, 1, "Use the left and right arrow keys to view more sensors, or press Q to quit Sensible.");
     wrefresh(commands);
     
-    //get list of sensors to check
-    //use parallel list: pressing arrow keys changes the offset
-
     int offset = 0; //start at top of list
 
     //refresh each window
@@ -51,7 +48,7 @@ int main(int argc, char **argv) {
         //only refresh on keypress or every 20th 50ms loop (1 second)
         if ((loop <= 20) && (input == ERR)) {
             loop++;
-            continue
+            continue;
         }
 
         //if we want to fully refresh, we do the rest of the loop
