@@ -127,15 +127,13 @@ void refresh_sensor_window(WINDOW *win, int offset) {
 
     //set up title and headings
     //try to get human-readable name first
-    char *title = sensors_get_adapter_name(&((*chip).bus)); 
-    if (title == NULL) {title = (*chip).prefix;} //use internal prefix as failsafe if there is no human-readable name
-    //title is whichever of the above two names we prefer
-    mvwprintw(win, 0, 1, title);
-    mvwprintw(win, 1, 1, "SENSOR");
-    mvwprintw(win, 1, 16, "           VALUE");
+    mvwprintw(win, 0, 1, (*chip).prefix); //title
+    mvwprintw(win, 1, 1, sensors_get_adapter_name(&((*chip).bus)) //sensor type
+    mvwprintw(win, 2, 1, "SENSOR");
+    mvwprintw(win, 2, 16, "           VALUE");
 
     //line indicates the next line to print info on
-    int line = 3;
+    int line = 4;
 
     //we loop over major features - sensors_get_features increments f as it runs, simulating a stack
     sensors_feature const *feat;
