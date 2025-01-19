@@ -126,7 +126,11 @@ void refresh_sensor_window(WINDOW *win, int offset) {
     }
 
     //set up title and headings
-    mvwprintw(win, 0, 1, (*chip).prefix);
+    //try to get human-readable name first
+    char *title = sensors_get_adapter_name((*chip).bus); 
+    if (title == NULL) {title = (*chip).prefix}; //use internal prefix as failsafe if there is no human-readable name
+    //title is whichever of the above two names we prefer
+    mvwprintw(win, 0, 1, title);
     mvwprintw(win, 1, 1, "SENSOR");
     mvwprintw(win, 1, 16, "           VALUE");
 
